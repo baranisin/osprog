@@ -1,2 +1,1 @@
-# osprog
-Programming in Operating Systems
+# Programming in Operating Systems
