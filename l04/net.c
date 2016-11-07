@@ -84,32 +84,46 @@ int main()
 	if (listen(sockfd, 10) == -1)
 		err("listen");
 
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(sockfd, &fds);  // we want to check the main socket at the beginning
 	while(1) {
 		int didSomeReading = 0;
 
-		struct sockaddr_in clientAddr;
-		socklen_t clientAddrSize = sizeof(clientAddr);
-		int clientSock = accept4(sockfd, (struct sockaddr *) &clientAddr,
-				&clientAddrSize, SOCK_NONBLOCK);
-		if (clientSock == -1 && errno != EAGAIN)
-			err("accept");
+		if (FD_ISSET(sockfd, &fds)) {
+			// new connection available ?
+			struct sockaddr_in clientAddr;
+			socklen_t clientAddrSize = sizeof(clientAddr);
+			int clientSock = accept4(sockfd, (struct sockaddr *) &clientAddr,
+					&clientAddrSize, SOCK_NONBLOCK);
+			if (clientSock == -1 && errno != EAGAIN)
+				err("accept");
 
-		if (clientSock != -1) {
-			// new client
-			didSomeReading = 1;
-			fprintf(stderr, "New connection from %s:%d\n",
-					inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-			clients[nClients].fd = clientSock;
-			clients[nClients].port = ntohs(clientAddr.sin_port);
-			// todo copy addr....
-			strncpy(clients[nClients].addr, inet_ntoa(clientAddr.sin_addr),
-					sizeof(clients[nClients].addr));
-			nClients++;
+			if (clientSock != -1) {
+				// new client
+				didSomeReading = 1;
+				fprintf(stderr, "New connection from %s:%d\n",
+						inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+				clients[nClients].fd = clientSock;
+				clients[nClients].port = ntohs(clientAddr.sin_port);
+				// todo copy addr....
+				strncpy(clients[nClients].addr, inet_ntoa(clientAddr.sin_addr),
+						sizeof(clients[nClients].addr));
+				nClients++;
+
+				// mark this client's fd to try a read immediatelly
+				FD_SET(clientSock, &fds);
+			}
 		}
 
 		int i=0;
 		for (i=0; i<nClients; ++i) {
 			struct client *c = &clients[i];
+			// skip this client it it doesn't have data
+			// not very nice, but works without introducing another indent level
+			if (!FD_ISSET(c->fd, &fds))
+				continue;
+
 			char buffer[16*1024];
 			int bytesRead = read(c->fd, buffer, sizeof(buffer));
 			if (bytesRead == -1 && errno != EAGAIN) err("reading from client");
@@ -129,7 +143,6 @@ int main()
 			}
 		}
 		if (!didSomeReading) {
-			fd_set fds;
 			int maxFd;
 			struct timeval tv;
 
