@@ -18,6 +18,10 @@ be worth a bonus point...
 Submitting
 ----------
 
+To get access to your private repository send an email to
+`siska@ii.fmph.uniba.sk` with your **name**, **AIS login** and **GitHub
+login**.  Use "osprog registration" as the subject of the email.
+
 Submit yur solution by commiting  file named `chat.c` (or `chat.cpp`) in
 the `as01` folder (of your fork of your private repository) and create a
 pull request against the **`as01` branch** of you private repository.
