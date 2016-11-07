@@ -58,17 +58,3 @@ Remeber you can run strace to see what's happening:
 ```sh
 strace nc localhost 1234 < /dev/urandom
 ```
-
-Homework assignment 01
-----------------------
-
-Create a simple TCP "chat": multiple clients can connect to it, every time a
-client sends data to the server it is "forwarded" (sent) to all the connected
-clients.
-
-Your program should buffer at least 1MB of data for each client. If a buffer
-for a client fills, drop additional data and print a warning to the console.
-
-Your program doesn't need to support more that 1000 simlutaneous connections
-(or below `FD_SETSIZE`). If it can manage more then `FD_SETSIZE` clients, it might
-be worth a bonus point...
