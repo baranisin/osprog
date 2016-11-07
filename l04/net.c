@@ -129,10 +129,41 @@ int main()
 			}
 		}
 		if (!didSomeReading) {
-			// go to sleep to save CPU cycle
-			// we might however needlessly wait for data that arrived just after
-			// we went to sleep
-			usleep(10000);
+			fd_set fds;
+			int maxFd;
+			struct timeval tv;
+
+			FD_ZERO(&fds); // clear the set of descriptors we want to watch
+			// This is easy to forget: the original socket to accept new connections
+			FD_SET(sockfd, &fds);
+			maxFd = sockfd;
+			int i=0;
+			for(i=0; i<nClients; ++i) {
+				FD_SET(clients[i].fd, &fds); // add a client descriptor to watch
+				if (clients[i].fd > maxFd)
+					maxFd = clients[i].fd;
+			}
+
+			// We wake up every 10 seconds even if there is nothing to read.
+			// This is just to demostrate it, we don't really need it and
+			// we could pass NULL as timeval to not wake up periodically.
+			tv.tv_sec = 10;
+			tv.tv_usec = 0;
+
+			int ret = select(maxFd+1, &fds, NULL, NULL, &tv);
+			if (ret == -1 && errno != EINTR) {
+				err("select");
+			}
+			else if (ret) {
+				// Data available to read on "ret" file descriptors.
+				// We will loop around and read them.
+				// Note tat it is important we read all of the
+				// available data before we call select again.
+			}
+			else {
+				// ret == 0 => timeout expired without any data
+				// tv should contain the remaining time
+			}
 		}
 	}
 
