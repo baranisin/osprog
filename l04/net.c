@@ -1,3 +1,4 @@
+#define _GNU_SOURCE    /* required to get the accep4 funcion variant */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -54,12 +55,21 @@ ssize_t copyFds(int infd, int outfd)
 	return 0;
 }
 
+struct client {
+	int fd;
+	char addr[20];
+	uint16_t port;
+};
+
+struct client clients[1000];
+int nClients = 0;
+
 int main()
 {
 	int sockfd;
 	int ret = 0;
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (sockfd == -1)
 		err("socket");
 
@@ -78,8 +88,8 @@ int main()
 
 		struct sockaddr_in clientAddr;
 		socklen_t clientAddrSize = sizeof(clientAddr);
-		int clientSock = accept(sockfd, (struct sockaddr *) &clientAddr,
-				&clientAddrSize);
+		int clientSock = accept4(sockfd, (struct sockaddr *) &clientAddr,
+				&clientAddrSize, SOCK_NONBLOCK);
 		if (clientSock == -1 && errno != EAGAIN)
 			err("accept");
 
@@ -87,9 +97,34 @@ int main()
 			// new client
 			fprintf(stderr, "New connection from %s:%d\n",
 					inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-			copyFds(clientSock, 1);
+			clients[nClients].fd = clientSock;
+			clients[nClients].port = ntohs(clientAddr.sin_port);
+			// todo copy addr....
+			strncpy(clients[nClients].addr, inet_ntoa(clientAddr.sin_addr),
+					sizeof(clients[nClients].addr));
+			nClients++;
 		}
 
+		int i=0;
+		for (i=0; i<nClients; ++i) {
+			struct client *c = &clients[i];
+			char buffer[16*1024];
+			int bytesRead = read(c->fd, buffer, sizeof(buffer));
+			if (bytesRead == -1 && errno != EAGAIN) err("reading from client");
+			if (bytesRead > 0) {
+				fprintf(stderr, "%s:%d:", c->addr, c->port);
+				write(1, buffer, bytesRead);
+			}
+			else if (bytesRead == 0) {
+				// connection closed for client
+				fprintf(stderr, "Connection from %s:%d closed\n", c->addr, c->port);
+				shutdown(c->fd, SHUT_RDWR); /* don't really have anything to do on error */
+				close(c->fd);
+				if (i<nClients-1)
+					memcpy( &clients[i], &clients[nClients-1], sizeof(clients[i]));
+				nClients--;
+			}
+		}
 	}
 
 	close(sockfd);
