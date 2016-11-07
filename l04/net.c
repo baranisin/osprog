@@ -85,6 +85,7 @@ int main()
 		err("listen");
 
 	while(1) {
+		int didSomeReading = 0;
 
 		struct sockaddr_in clientAddr;
 		socklen_t clientAddrSize = sizeof(clientAddr);
@@ -95,6 +96,7 @@ int main()
 
 		if (clientSock != -1) {
 			// new client
+			didSomeReading = 1;
 			fprintf(stderr, "New connection from %s:%d\n",
 					inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 			clients[nClients].fd = clientSock;
@@ -112,6 +114,7 @@ int main()
 			int bytesRead = read(c->fd, buffer, sizeof(buffer));
 			if (bytesRead == -1 && errno != EAGAIN) err("reading from client");
 			if (bytesRead > 0) {
+				didSomeReading = 1;
 				fprintf(stderr, "%s:%d:", c->addr, c->port);
 				write(1, buffer, bytesRead);
 			}
@@ -124,6 +127,12 @@ int main()
 					memcpy( &clients[i], &clients[nClients-1], sizeof(clients[i]));
 				nClients--;
 			}
+		}
+		if (!didSomeReading) {
+			// go to sleep to save CPU cycle
+			// we might however needlessly wait for data that arrived just after
+			// we went to sleep
+			usleep(10000);
 		}
 	}
 
