@@ -4,6 +4,9 @@ Lab 4
 echo server
 -----------
 
+*You can find a step by step walkthrough of the solution for this problem
+in [pull requst #1](https://github.com/FMFI-UK-2-AIN-118/osprog/pull/1).*
+
 *In this excercise you can assume that output to the console is immediate
 and it won't block your program, i.e. you don't have to implement non-blocking
 writes to stdout/stderr.*
