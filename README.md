@@ -17,3 +17,15 @@ Assignments
 --------------------
 
 * [A01](http://dai.fmph.uniba.sk/~siska/osprog/04/#du01) (TCP chat)
+
+Grades
+-------
+
+You can check your grades/points in the file `report.md` in branch
+`report` in your repositories. A direct URL would be (don't forget
+to change ‹LOGIN› for your login):
+
+    https://github.com/FMFI-UK-2-AIN-118/osprog-‹LOGIN›/blob/report/report.md
+
+If you are reading this from your repository, this
+[direct link](../../blob/report/report.md) should work.
