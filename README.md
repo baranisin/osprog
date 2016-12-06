@@ -16,7 +16,7 @@ Labs
 Assignments
 --------------------
 
-* [A01](http://dai.fmph.uniba.sk/~siska/osprog/04/#du01) (TCP chat)
+* [A01](as01) (TCP chat)
 
 Grades
 -------
