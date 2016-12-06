@@ -4,6 +4,9 @@ Homework assignment 01
 *This assignment is due Tuesday Nov 15 23:59:59. See [Submitting](#submitting)
 below for instructions*
 
+Chat (30pt)
+-----------
+
 Create a simple TCP "chat": multiple clients can connect to it, every time a
 client sends data to the server it is "forwarded" (sent) to all the connected
 clients.
