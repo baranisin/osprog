@@ -17,6 +17,7 @@ Assignments
 --------------------
 
 * [A01](as01) (TCP chat)
+* [A02](as02) (async shell)
 
 Grades
 -------
