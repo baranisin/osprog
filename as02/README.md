@@ -1,7 +1,7 @@
 Homework assignment 02
 ======================
 
-*This assignment is due Friday Dec 16 23:59:59. See [Submitting](#submitting)
+*This assignment is due Wednesday Dec 21 23:59:59. See [Submitting](#submitting)
 below for instructions*
 
 Asynchronous shell (30pt)
